@@ -4,7 +4,6 @@ from random import randint
 
 window = pyglet.window.Window(960, 540)
 batch = pyglet.graphics.Batch()
-batch2 = pyglet.graphics.Batch()
 
 circle = shapes.Circle(700, 150, 100, color=(50, 225, 30), batch=batch)
 rectangle = shapes.Rectangle(250, 300, 400, 200, color=(255, 22, 20), batch=batch)
@@ -17,14 +16,11 @@ sector = shapes.Sector(50+40, 51+40, 80, angle=209, start_angle=1, color=(33, 22
 arc = shapes.Arc(200, 200, 20, angle=2, color=(222, 222, 0), batch=batch)
 borderRectangle = shapes.BorderedRectangle(350, 100, 100, 100, border=10, color=(255, 0, 255), batch=batch)
 
-circleArr = []
-for i in range(1000):
-    circleArr.append(shapes.Circle(randint(0, 960), randint(0, 540), 10, color=(randint(0, 255), randint(0, 255), randint(0, 255)), batch=batch2))
+circleArr = [shapes.Circle(randint(0, 960), randint(0, 540), 10, color=(randint(0, 255), randint(0, 255), randint(0, 255)), batch=batch) for i in range(1000)]
 
 @window.event
 def on_draw():
     window.clear()
     batch.draw()
-    batch2.draw()
 
 pyglet.app.run()
