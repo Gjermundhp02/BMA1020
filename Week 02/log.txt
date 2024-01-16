@@ -1,6 +1,3 @@
-I tried to remember how to create a long array and rememberd I could multiply an array with a number to make a long array
-For a function I just created a function that prints it's argument
-I didn't know what to do for a nested for loop so i loop form 0 to 100 with a step 
 15.01.23 13:31 https://www.geeksforgeeks.org/python-convert-a-list-into-a-tuple/
 15.01.23 14:17 https://pyglet.readthedocs.io/en/latest/modules/shapes.html
 15.01.23 14:44 https://pyglet.readthedocs.io/en/latest/modules/graphics/index.html#pyglet.graphics.Batch
