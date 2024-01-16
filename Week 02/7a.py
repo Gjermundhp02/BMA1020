@@ -5,12 +5,12 @@ def printSomething(something):
     print(something)
 
 # Sum all the numbers from 0 to 100
-number = 0
+sum = 0
 for num1 in range(0, 100, 10):
     for num2 in range(10):
-        number+=num1+num2
+        sum+=num1+num2
 
-# Looper frem til den når ett tallet i listen
+# Loops until it reaches a non zero number in the list
 list1[3422]=1
 index = 0
 while not list1[index]:
