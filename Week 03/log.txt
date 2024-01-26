@@ -1,0 +1,5 @@
+Sjekket pyglet dokumentasjonen for å finne ut om det er circle.x eller circle.ancor_x som endrer x posisjonen
+I struggeld for a while with getting the projection to work. I went to geogebra to visulize it and found out i mixed up u and v
+I decided to use classes to better store the data of the circles and lines.
+The circles have all the logic for detecting intersections as they are the ones that change the most in color
+I created a intersection function to handle the 
