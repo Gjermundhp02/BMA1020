@@ -3,3 +3,8 @@ I struggeld for a while with getting the projection to work. I went to geogebra 
 I decided to use classes to better store the data of the circles and lines.
 The circles have all the logic for detecting intersections as they are the ones that change the most in color
 I created a intersection function to handle the 
+I looked up how to draw text to easier debug the code and see which elements didn't do what i expected
+I had problems moving both the points of the line the same distance because i recalculated a variable vhere I wanted to use the original. Therfore i did the calculations beforehand(se line 87 & 88)
+i had to look up how to add one array to another and found list.extednd() form w3 schools
+I looked up how to cancel a scheduled function. Found it in the pyglet docs
+Looked up how to register key presses
