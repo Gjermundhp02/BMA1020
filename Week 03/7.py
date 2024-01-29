@@ -14,16 +14,10 @@ green=(0, 255, 0)
 blue=(0, 0, 255)
 orange=(255,140,0)
 
+# Task A
 def dot(u, v):
     return u[0]*v[0]+u[1]*v[1]
 
-def project(u, v):
-    scalar = dot(u, v)/dot(v, v)
-    print(scalar)
-    return [v[0]*scalar, v[1]*scalar]
-
-def clamp(x, a, b): 
-    return max(a, min(x, b))
 class Circle:
     def __init__(self, x, y, velx=10, vely=10, index=None) -> None:
         self.shape = shapes.Circle(x, y, 50, color=red, batch=batchA)
@@ -172,21 +166,8 @@ def intersects() -> None:
             if circles[i].intersects(lines[j]):
                 circles[i].intersectL = True
                 lines[j].intersectC = True
-            
 
-def update(dt) -> None:
-    if task:
-        intersects()
-        for i in circles:
-            i.update(dt)
-        for i in lines:
-            i.update(dt)
-    else:
-        for i in cat:
-            i.update()
-        cat[0].x += 100*dt
-        print(cat[0].shape.x)
-
+# Task B
 cat = [Ellipse(window.width/6, window.height/2, 100, 50, -1), #Body
        Ellipse(-70, 40, 50, 50, 0), #Head
        Ellipse(-20, 40, 25, 25, 1), #Ear
@@ -210,38 +191,18 @@ cat = [Ellipse(window.width/6, window.height/2, 100, 50, -1), #Body
        Ellipse(20, 20, 10, 10, 1, color=(0, 0, 0)) #Eye
 ]
 
-# [[list, index, size, x, y, parent]]
-# [[list, index, x, y, x2, y2, parent]]
-# cat = [['c', 0, 100, window.width/2, window.height/2, -1], 
-#        ['c', 1, 50, 100, 50, 0],
-#        ['c', 2, 25, 25, 25, 1],
-#        ['c', 3, 25, -25, 50, 1],
-#        ['l', 0, -50, 50, -50, 100, 0]
-#        ['l', 1, -50, 100, -50, 100, 0]
+def update(dt) -> None:
+    if task:
+        intersects()
+        for i in circles:
+            i.update(dt)
+        for i in lines:
+            i.update(dt)
+    else:
+        for i in cat:
+            i.update()
+        cat[0].x += 100*dt
 
-#        ['l', 0, -40, -50, 50, 0]
-
-#        ['l', 0, 40, -50, 50, 0]
-#        ['l', 0, 50, -50, 50, 0]
-#        ]
-
-# [[x, y, with, height, rot, parent]]
-# cat = [
-#     [window.width/2, window.height/2, 100, 50, None],
-#     [-80, 50, 50, 50, 0],
-#     [-30, 55, 25, 25, 1],
-#     [30, 55, 25, 25, 1],
-#     [-40, -40, ]
-# ]
-
-# def posX(start):
-#     return cat[start][0]+(posX(cat[start][-1]) if start>0 else 0)
-# def posY(start):
-#     return cat[start][1]+(posY(cat[start][-1]) if start>0 else 0)
-
-# catShapes=[shapes.Ellipse(posX(index), posY(index), i[2], i[3], color=red, batch=batcha) for index, i in enumerate(cat)]
-
-# catShapes.append(shapes.Ellipse(*cat[0][:-1], color=color, batch=batch))
 # True = A False = B
 task = True
 
