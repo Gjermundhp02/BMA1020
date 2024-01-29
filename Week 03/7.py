@@ -9,10 +9,10 @@ window = pyglet.window.Window(960, 540)
 batchA = pyglet.graphics.Batch()
 batchB = pyglet.graphics.Batch()
 
-red=(255, 0, 0)
-green=(0, 255, 0)
-blue=(0, 0, 255)
-orange=(255,140,0)
+red=(255, 0, 0) # Color1
+green=(0, 255, 0) # Color2
+blue=(0, 0, 255) # Color3
+orange=(255,140,0) # Color4
 
 # Task A
 def dot(u, v):
