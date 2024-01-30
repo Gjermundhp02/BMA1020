@@ -8,3 +8,5 @@ I had problems moving both the points of the line the same distance because i re
 i had to look up how to add one array to another and found list.extednd() form w3 schools
 I looked up how to cancel a scheduled function. Found it in the pyglet docs
 Looked up how to register key presses
+I finally found out how to use clamp for the distance between a line and a circle
+Rewrote task a to use pyglet vectors

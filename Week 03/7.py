@@ -2,6 +2,7 @@ from __future__ import annotations
 import pyglet
 from pyglet import shapes, text
 from pyglet.window import key
+from pyglet.math import Vec2, clamp
 from random import randint
 from math import sqrt
 
@@ -21,6 +22,8 @@ def dot(u, v):
 class Circle:
     def __init__(self, x, y, velx=10, vely=10, index=None) -> None:
         self.shape = shapes.Circle(x, y, 50, color=red, batch=batchA)
+        self.pos = Vec2(x, y)
+        self.vel = Vec2(velx, vely)
         self.velx = velx
         self.vely = vely
         self.label = text.Label(str(index), x=x, y=y, batch=batchA) if index!=None else None
@@ -33,24 +36,19 @@ class Circle:
     def intersects(self, other: Circle|Line) -> bool:
         match type(other).__name__:
             case 'Circle':
-                return sqrt((self.shape.x-other.shape.x)**2+(self.shape.y-other.shape.y)**2) <= 100
+                return abs(self.pos-other.pos) <= 2*50
             case 'Line':
-                v = [other.shape.x2-other.shape.x, other.shape.y2-other.shape.y]
-                u = [self.shape.x-other.shape.x, self.shape.y-other.shape.y]
-                scalar = dot(v, u)/dot(v, v)
-                if scalar<0:
-                    return sqrt(u[0]**2+u[1]**2) <= 50
-                elif scalar>1:
-                    return sqrt((self.shape.x+other.shape.x2)**2+(self.shape.y+other.shape.y2)**2) <= 50
-                else:
-                    return sqrt((u[0]-scalar*v[0])**2+(u[1]-scalar*v[1])**2) <= 50
+                v = other.pos2-other.pos
+                u = self.pos-other.pos
+                return abs(self.pos-(v*clamp(u.dot(v)/v.dot(v), 0, 1)+other.pos)) <= 50
     
     def update(self, dt):
-        self.shape.x += self.velx*dt
-        self.shape.y += self.vely*dt
+        self.pos += self.vel*dt
+        self.shape.x = self.pos.x
+        self.shape.y = self.pos.y
         if self.label:
-            self.label.x = self.shape.x
-            self.label.y = self.shape.y
+            self.label.x = self.pos.x
+            self.label.y = self.pos.y
         if self.intersectC:
             self.shape.color = green
         elif self.intersectL:
@@ -62,20 +60,21 @@ class Circle:
         self.intersectL = False
 
     def outOfBounds(self):
-        if self.shape.x < -50:
-            self.shape.x = window.width+50
-        elif self.shape.x > window.width+50:
-            self.shape.x = -50
-        if self.shape.y < -50:
-            self.shape.y = window.height+50
-        elif self.shape.y > window.height+50:
-            self.shape.y = -50
+        if self.pos.x < -50:
+            self.pos.x = window.width+50
+        elif self.pos.x > window.width+50:
+            self.pos.x = -50
+        if self.pos.y < -50:
+            self.pos.y = window.height+50
+        elif self.pos.y > window.height+50:
+            self.pos.y = -50
 
 class Line:
     def __init__(self, x, y, x2, y2, velx=10, vely=10, index=None) -> None:
         self.shape = shapes.Line(x, y, x2, y2, 10, color=red, batch=batchA)
-        self.velx = velx
-        self.vely = vely
+        self.pos = Vec2(x, y)
+        self.pos2 = Vec2(x2, y2)
+        self.vel = Vec2(velx, vely)
         self.label = text.Label(str(index), x=x, y=y, batch=batchA) if index!=None else None
         self.intersectC = False
     
@@ -83,29 +82,31 @@ class Line:
         return "Line"
     
     def outOfBounds(self):
-        diffx = abs(self.shape.x2-self.shape.x)
-        diffy = abs(self.shape.y2-self.shape.y)
-        if max(self.shape.x, self.shape.x2) < 0:
-            self.shape.x += window.width+diffx
-            self.shape.x2 += window.width+diffx
-        elif min(self.shape.x, self.shape.x2) > window.width:
-            self.shape.x -= window.width+diffx; 
-            self.shape.x2 -= window.width+diffx
-        if max(self.shape.y, self.shape.y2) < 0:
-            self.shape.y += window.height+diffy
-            self.shape.y2 += window.height+diffy
-        elif min(self.shape.y, self.shape.y2) > window.height:
-            self.shape.y -= window.height+diffy
-            self.shape.y2 -= window.height+diffy
+        diffx = abs(self.pos2.x-self.pos.x)
+        diffy = abs(self.pos2.y-self.pos.y)
+        if max(self.pos.x, self.pos2.x) < 0:
+            self.pos.x += window.width+diffx
+            self.pos2.x += window.width+diffx
+        elif min(self.pos.x, self.pos2.x) > window.width:
+            self.pos.x -= window.width+diffx; 
+            self.pos2.x -= window.width+diffx
+        if max(self.pos.y, self.pos2.y) < 0:
+            self.pos.y += window.height+diffy
+            self.pos2.y += window.height+diffy
+        elif min(self.pos.y, self.pos2.y) > window.height:
+            self.pos.y -= window.height+diffy
+            self.pos2.y -= window.height+diffy
 
-    def update(self, dt):
-        self.shape.x += self.velx*dt
-        self.shape.y += self.vely*dt
-        self.shape.x2 += self.velx*dt
-        self.shape.y2 += self.vely*dt
+    def update(self, dt: float):
+        self.pos += self.vel*dt
+        self.pos2 += self.vel*dt
+        self.shape.x = self.pos.x
+        self.shape.y = self.pos.y
+        self.shape.x2 = self.pos2.x
+        self.shape.y2 = self.pos2.y
         if self.label:
-            self.label.x = self.shape.x
-            self.label.y = self.shape.y
+            self.label.x = self.pos.x
+            self.label.y = self.pos.y
         if self.intersectC:
             self.shape.color = orange
         else:
@@ -116,26 +117,25 @@ class Line:
 class Ellipse:
     def __init__(self, x, y, width, height, parentIndex, color=(100, 100, 100)) -> None:
         self.shape = shapes.Ellipse(x, y, width, height, color=color, batch=batchB) if parentIndex==-1 else None
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height 
+        self.pos = Vec2(x, y)
+        self.size = Vec2(width, height)
         self.parentIndex = parentIndex
         self.color = color
     
     def update(self) -> None:
-        x = self.x
-        y = self.y
+        x = self.pos.x
+        y = self.pos.y
+        # Sums all the relative positions
         if self.parentIndex>-1:
             parent = cat[self.parentIndex]
             while parent.parentIndex>-1:
-                x += parent.x
-                y += parent.y
+                x += parent.pos.x
+                y += parent.pos.y
                 parent = cat[parent.parentIndex]
-            x += parent.x
-            y += parent.y
+            x += parent.pos.x
+            y += parent.pos.y
         if self.shape == None:
-            self.shape = shapes.Ellipse(x, y, self.width, self.height, color=self.color, batch=batchB)
+            self.shape = shapes.Ellipse(x, y, self.size.x, self.size.y, color=self.color, batch=batchB)
         else:
             self.shape.x = x
             self.shape.y = y
@@ -201,7 +201,7 @@ def update(dt) -> None:
     else:
         for i in cat:
             i.update()
-        cat[0].x += 100*dt
+        cat[0].pos.x += 100*dt
 
 # True = A False = B
 task = True
