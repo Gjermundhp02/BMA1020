@@ -1,14 +1,39 @@
-from sympy import pi, sin, cos, sqrt, symbols
+from sympy import sin, cos, sqrt, symbols
 from sympy.matrices import Matrix
 a = symbols("a")
 b = symbols("b")
 c = symbols("c")
+α = symbols("α")
 
-R = Matrix([[a/sqrt(a**2+b**2), -b/sqrt(a**2+b**2), 0], 
-            [a/sqrt(a**2+b**2), b/sqrt(a**2+b**2), 0],
+Rz = Matrix([[a/sqrt(a**2+b**2), +b/sqrt(a**2+b**2), 0], 
+            [-b/sqrt(a**2+b**2), a/sqrt(a**2+b**2), 0],
             [0, 0, 1]])
 
-u = Matrix([[a], [b], [c]])
-Ru = R*u
+u = Matrix([a, b, c])
+Rzu = Rz*u
+
+Ry = Matrix([[Rzu[0], 0, Rzu[2]], 
+            [0, 1, 0],
+            [-Rzu[2], 0, Rzu[0]]])
+
+Ru=Ry*Rzu
+
 print(Ru)
-print(Ru[0]/sqrt(Ru[0]**2+Ru[1]**2+Ru**[2]))
+Rx = Matrix([[1, 0, 0],
+            [0, cos(α), -sin(α)], 
+            [0, sin(α),  cos(α)]])
+
+Ru=Rx*Ru
+
+Ry = Matrix([[-Rzu[0], 0, -Rzu[2]], 
+            [0, 1, 0],
+            [Rzu[2], 0, -Rzu[0]]])
+Ru=Ry*Ru
+Rz = Matrix([[-a/sqrt(a**2+b**2), -b/sqrt(a**2+b**2), 0], 
+            [b/sqrt(a**2+b**2), -a/sqrt(a**2+b**2), 0],
+            [0, 0, 1]])
+
+Ru=Rz*Ru
+
+
+# print(Ru)

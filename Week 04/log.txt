@@ -1,0 +1,5 @@
+For 1b i first thought of hotello, but each sqare there has three states and I wnated a result with only true or false so i simplifyed it to if a pice is on a square then it results in true
+For 1c i just wrote something to satisfy the criteria, but i learned that the order of the for loops was oposite of what i thought. I thought that the x loop was the inner most of the loops in a traditional for loop setup
+I dint know the methods for intesection so i searchedd it up on w3 school https://www.w3schools.com/python/python_sets_join.asp
+I I dint know the  dictionary methods so i searchedd it up on w3 school
+Dictionaries can be used to store chat logs/event logs
