@@ -15,4 +15,5 @@ K = Matrix([[0, -c, b], [c, 0, -a], [-b, a, 0]])
 I = Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 R = Matrix(I+(1-cos(α))*K*K)
 
+print(R)
 print(cos(α)*z+(1-cos(α))*u.dot(z)*u)
