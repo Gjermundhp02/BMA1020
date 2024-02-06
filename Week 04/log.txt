@@ -3,3 +3,4 @@ For 1c i just wrote something to satisfy the criteria, but i learned that the or
 I dint know the methods for intesection so i searchedd it up on w3 school https://www.w3schools.com/python/python_sets_join.asp
 I I dint know the  dictionary methods so i searchedd it up on w3 school
 Dictionaries can be used to store chat logs/event logs
+I looked up advantiges of dicionaries vs lists https://stackoverflow.com/questions/626759/whats-the-difference-between-lists-and-tuples
