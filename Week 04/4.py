@@ -5,11 +5,12 @@ b = symbols("b")
 c = symbols("c")
 α = symbols("α")
 
+u = Matrix([a, b, c])
+
 Rz = Matrix([[a/sqrt(a**2+b**2), +b/sqrt(a**2+b**2), 0], 
             [-b/sqrt(a**2+b**2), a/sqrt(a**2+b**2), 0],
             [0, 0, 1]])
 
-u = Matrix([a, b, c])
 Rzu = Rz*u
 
 Ry = Matrix([[Rzu[0], 0, Rzu[2]], 
