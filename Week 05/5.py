@@ -10,6 +10,24 @@ green=(0, 255, 0) # Color2
 blue=(0, 0, 255) # Color3
 yellow=(255, 255, 0) # Color4
 
+movingCircles = [[shapes.Circle(10, 10, 10, color=red, batch=batch), 
+                  20,                   # startposx
+                  window.height-(30+i), # startposy
+                  230,                  # endposx
+                  window.height-(30+i), # endposy
+                  1/5,                  # velocity
+                  0,                    # tpos  
+                  0,                    # dir
+                  0,                    # posparam
+                  lambda i: movingCircles[i][6] = 0,
+                  ] for i in range(0, 150, 50)]
+
+movingCircles[1][5] = 1/2
+movingCircles[2][5] = 1/2
+
+def translate(start, end, t):
+    return (1-t)*start + t*end
+
 circle1 = {
     "shape": shapes.Circle(10, 10, 10, color=red, batch=batch),
     "startposx": 20,
@@ -83,14 +101,14 @@ def update(dt):
     circle1["shape"].y = (1-circle1["tpos"])*circle1['startposy'] + circle1["tpos"]*circle1["endposy"]
 
     circle2["tpos"] += (1/2)*dt*circle2["dir"]
-    if circle2["tpos"] >= 1 or circle2["tpos"] <= 0:
+    if circle2["tpos"] >= 1 or circle2["tpos"] < 0:
         circle2["dir"] = -circle2["dir"]
     circle2["shape"].x = (1-circle2["tpos"])*circle2['startposx'] + circle2["tpos"]*circle2["endposx"]
     circle2["shape"].y = (1-circle2["tpos"])*circle2['startposy'] + circle2["tpos"]*circle2["endposy"]
 
     circle3["tpos"] += (1/2)*dt*circle3["dir"]
     circle3["posparam"] = circle3["tpos"]**2*(3-2*circle3["tpos"])
-    if circle3["tpos"] >= 1 or circle3["tpos"] <= 0:
+    if circle3["tpos"] >= 1 or circle3["tpos"] < 0:
         circle3["dir"] = -circle3["dir"]
     circle3["shape"].x = (1-circle3["posparam"])*circle3['startposx'] + circle3["posparam"]*circle3["endposx"]
     circle3["shape"].y = (1-circle3["posparam"])*circle3['startposy'] + circle3["posparam"]*circle3["endposy"]
