@@ -1,6 +1,5 @@
 import pyglet
-from pyglet import shapes, text
-from math import sqrt
+from pyglet import shapes
 
 window = pyglet.window.Window(500, 500)
 batch = pyglet.graphics.Batch()
@@ -9,6 +8,7 @@ red=(255, 0, 0) # Color1
 green=(0, 255, 0) # Color2
 blue=(0, 0, 255) # Color3
 yellow=(255, 255, 0) # Color4
+magenta=(255, 0, 255) # Color5
 
 movingCircles = [[shapes.Circle(10, 10, 20, color=red, batch=batch), 
                   20,                   # startposx
@@ -44,13 +44,26 @@ colorCircles[2][1] = 25
 colorCircles[2][3] = green
 colorCircles[2][4] = yellow
 
+bezierCircles = [[shapes.Circle(0, 0, 20, color=magenta, batch=batch),
+                  500,  # p1x
+                  250,  # p2x
+                  20,   # p3x
+                  100,  # p1y
+                  500,  # p2y
+                  350,  # p3y
+                  1/2,  # velocity
+                  i*0.2/2,    # t
+                  0     # param
+                  ] for i in range(10)]
+
 def translate(points, t):
-    return [ (1-t)*points[i]+t*points[i+1] for i in range(0, len(points), 2)]
+    return [(1-t)*points[i]+t*points[i+1] for i in range(0, len(points), 2)]
 
 def translateColor(color1, color2, t):
     return [translate([color1[i], color2[i]], t) for i in range(3)]
 
-tpos = 0
+def translateBezier(points, t):
+    return translate([*translate([points[0], points[1]], t), *translate([points[1], points[2]], t)], t)
 
 def update(dt):
     for i in range(len(movingCircles)):
@@ -64,6 +77,7 @@ def update(dt):
             if movingCircles[i][6] >= 1 or movingCircles[i][6] < 0:
                 movingCircles[i][7] = -movingCircles[i][7]
             if i == 1:
+                # set the param to be the same as the t to make the same code work on both circles
                 movingCircles[i][8] = movingCircles[i][6]
             elif i == 2:
                 movingCircles[i][8] = movingCircles[i][6]**2*(3-2*movingCircles[i][6])
@@ -75,7 +89,7 @@ def update(dt):
             movingCircles[i][0].x, movingCircles[i][0].y = translate(movingCircles[i][1:5], movingCircles[i][8])
 
     for i in range(len(colorCircles)):
-        colorCircles[i][6] += (1/2)*dt*colorCircles[i][7]
+        colorCircles[i][6] += colorCircles[i][5]*dt*colorCircles[i][7]
         if colorCircles[i][6] >= 1 or colorCircles[i][6] <= 0:
             colorCircles[i][7] = -colorCircles[i][7]
         if i == 0 or i == 2:
@@ -85,6 +99,13 @@ def update(dt):
             for j in range(3):
                 color.append(int(*translate([colorCircles[i][3][j], colorCircles[i][4][j]], colorCircles[i][6])))
             colorCircles[i][0].color = color
+    
+    for i in range(len(bezierCircles)):
+        bezierCircles[i][8] += bezierCircles[i][7]*dt
+        if bezierCircles[i][8] >= 1:
+            bezierCircles[i][8] = 0
+        bezierCircles[i][0].x = translateBezier(bezierCircles[i][1:4], bezierCircles[i][8])[0]
+        bezierCircles[i][0].y = window.height-translateBezier(bezierCircles[i][4:7], bezierCircles[i][8])[0]
 
 pyglet.clock.schedule_interval(update, 1/60)
 
