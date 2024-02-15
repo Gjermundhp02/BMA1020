@@ -10,7 +10,7 @@ blue=(0, 0, 255) # Color3
 yellow=(255, 255, 0) # Color4
 magenta=(255, 0, 255) # Color5
 
-movingCircles = [[shapes.Circle(10, 10, 20, color=red, batch=batch), 
+movingCircles = [[shapes.Circle(10, window.height-(30+i), 20, color=red, batch=batch), 
                   20,                   # startposx
                   230,                  # endposx
                   window.height-(30+i), # startposy
@@ -27,7 +27,7 @@ movingCircles[3][0].color = blue
 movingCircles[1][5] = 1/2
 movingCircles[2][5] = 1/2
 
-colorCircles = [[shapes.Circle(50+i, 50, 50, color=red, batch=batch),
+colorCircles = [[shapes.Circle(50+i, window.height-300, 50, color=red, batch=batch),
                 50,   # startsize
                 50,   # endsize
                 red,  # startcolor
@@ -44,7 +44,7 @@ colorCircles[2][1] = 25
 colorCircles[2][3] = green
 colorCircles[2][4] = yellow
 
-bezierCircles = [[shapes.Circle(0, 0, 20, color=magenta, batch=batch),
+bezierCircles = [[shapes.Circle(0, 0, 10, color=magenta, batch=batch),
                   500,  # p1x
                   250,  # p2x
                   20,   # p3x
