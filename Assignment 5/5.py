@@ -9,7 +9,7 @@ circleVel = np.array([[4.0, 2.0],[3.0,11.0], [21.0, 40.0]], dtype = float)
 #
 def updateA(dt):
     global circlePos
-    pass  # finish the implementation of the integration step
+    circlePos += dt * circleVel
 
 
 # b)
@@ -17,7 +17,7 @@ def updateA(dt):
 #
 def move(xv, yv):
     global circlePos
-    pass # finish implementing the function in one line of code
+    circlePos += np.array([xv, yv])
 
 
 # c)
@@ -27,7 +27,7 @@ circleColor = np.zeros((3, 4)) # all circles are black to begin with
 
 def turnRed():
     global circleColor
-    pass # finish implementing the function in one line of code
+    circleColor = np.array([[1.0, 0.0, 0.0, 1.0] for _ in range(3)])
 
 
 # d)
@@ -35,7 +35,7 @@ def turnRed():
 #
 def brighten():
     global circleColor
-    pass # finish implementing the function in one line of code
+    circleColor[:, :3] /= 2 
 
 
     
