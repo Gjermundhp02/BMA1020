@@ -1,5 +1,6 @@
 import pyglet
 from pyglet import shapes
+from pyglet.math import clamp
 
 window = pyglet.window.Window(500, 500)
 batch = pyglet.graphics.Batch()
@@ -60,7 +61,7 @@ def translate(points, t):
     return [(1-t)*points[i]+t*points[i+1] for i in range(0, len(points), 2)]
 
 def translateColor(color1, color2, t):
-    return [translate([color1[i], color2[i]], t) for i in range(3)]
+    return [clamp(int(translate([color1[i], color2[i]], t)[0]), 0, 255) for i in range(3)]
 
 def translateBezier(points, t):
     return translate([*translate([points[0], points[1]], t), *translate([points[1], points[2]], t)], t)
@@ -98,7 +99,7 @@ def update(dt):
             color = []
             for j in range(3):
                 color.append(int(*translate([colorCircles[i][3][j], colorCircles[i][4][j]], colorCircles[i][6])))
-            colorCircles[i][0].color = color
+            colorCircles[i][0].color = translateColor(colorCircles[i][3], colorCircles[i][4], colorCircles[i][6])
     
     for i in range(len(bezierCircles)):
         bezierCircles[i][8] += bezierCircles[i][7]*dt
