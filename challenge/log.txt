@@ -3,3 +3,4 @@ https://math.stackexchange.com/questions/725851/representing-translation-by-matr
 https://math.stackexchange.com/questions/2093314/rotation-matrix-of-rotation-around-a-point-other-than-the-origin
 https://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
 https://pyglet.readthedocs.io/en/latest/modules/graphics/index.html#pyglet.graphics.Group
+https://stackoverflow.com/questions/1401712/how-can-the-euclidean-distance-be-calculated-with-numpy
