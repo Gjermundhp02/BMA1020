@@ -137,3 +137,7 @@ def on_draw():
     batch.draw()
 
 pyglet.app.run()
+
+# TODO:
+# - Add tunnels
+# - Support speed of ferriswheel
