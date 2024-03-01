@@ -16,12 +16,12 @@ t=0
 class Cart:
     def __init__(self, pos, size, origin=(), r=0, batch=None):
         # Uses sliced pos to support both length 2 and 3
-        self.pos = np.array([*pos[:2], 1])+[*origin[:2], 0]
+        self.pos = np.array([*pos[:2], 1])
         self.size = np.array(size)
         self.shape = shapes.Rectangle(*pos[:2], *size, color=(255, 0, 0), batch=batch)
         self.origin = np.array([*origin[:2], 1]) # Point to rotate around
         if len(origin): self.rotate(r)
-        print(self.pos, self.origin)
+        
     
     def setPos(self, pos):
         self.pos = np.array([*pos, 1])
@@ -53,15 +53,31 @@ class FerrisWheel:
         # Two circles are used because Arc does not support thickness
         self.shape = shapes.Circle(*pos, r, color=(255, 255, 255), batch=batch)
         self.shape2 = shapes.Circle(*pos, r-self.thikness, color=backgroundColor, batch=batch)
+        self.legs = [shapes.Line(*pos, *(self.pos[:2]+[r/2, -r-10]), 5, color=(255, 255, 255), batch=batch),
+                     shapes.Line(*pos, *(self.pos[:2]+[-r/2, -r-10]), 5, color=(255, 255, 255), batch=batch)]
 
-        self.carts = [Cart((r-thikness/2, 0), (20, 10), self.pos, 2*np.pi/8*i, batch) for i in range(8)]
         self.spokes = [shapes.Line(*pos, r*np.cos(2*np.pi/8*i)+pos[0], r*np.sin(2*np.pi/8*i)+pos[1], 2, color=(255, 255, 255), batch=batch) for i in range(8)]
+        self.carts = [Cart(self.pos+[r-thikness/2, 0, 0], (20, 10), self.pos, 2*np.pi/8*i, batch) for i in range(8)]
 
     def update(self):
         for cart in self.carts:
             cart.rotate(0.01)
             cart.update()
+        for spoke in self.spokes:
+            spoke.x2, spoke.y2 = rotate((spoke.x2, spoke.y2, 1), self.pos, 0.01)[:2]
 
+def rotate(pos, origin, t):
+    rotation = np.array([[np.cos(t), -np.sin(t), 0],
+                        [np.sin(t),  np.cos(t), 0],
+                        [0,          0,         1]])
+    
+    translation = np.identity(3)
+    translation[:2, 2] = origin[:2]
+
+    translationNeg = np.identity(3)
+    translationNeg[:2, 2] = -origin[:2]
+
+    return (translation @ rotation @ translationNeg @ pos)
 
 def translate(p1, p2, t):
     return ((1-t)*p1[0]+t*p2[0], (1-t)*p1[1]+t*p2[1])
