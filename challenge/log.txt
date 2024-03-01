@@ -1,0 +1,4 @@
+https://pyglet.readthedocs.io/en/latest/programming_guide/mouse.html
+https://math.stackexchange.com/questions/725851/representing-translation-by-matrix-multiplication-in-higher-dimension
+https://math.stackexchange.com/questions/2093314/rotation-matrix-of-rotation-around-a-point-other-than-the-origin
+https://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
