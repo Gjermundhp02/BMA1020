@@ -90,7 +90,6 @@ class Tunnel:
         self.t += (self.tpos[1]-self.tpos[0])*(1/self.tpos[1])/2*dt
         if self.tpos[0]<t<self.tmid:
             backgroundColor = translate(colorOutTunnel, colorInTunnel, self.t)
-            print(backgroundColor)
         elif self.tpos[1]>t>self.tmid:
             backgroundColor = translate(colorInTunnel, colorOutTunnel, self.t)
         
@@ -121,7 +120,7 @@ def translateList(points, t):
             return translateList([translate(points[i], points[i+1], t) for i in range(len(points)-1)], t=t)
 
 # --- Globals instances ---
-track = shapes.BezierCurve(*trackPoints, color=(0, 0, 0), batch=batch)
+track = shapes.BezierCurve(*trackPoints, thickness=50, color=(255, 0, 0), batch=batch)
 cart = Cart(trackPoints[0], (10, 5), batch=batch)
 wheel = FerrisWheel((100, 100), 50, batch=batch)
 tunnels = [Tunnel(tunnelPoints[i], 10, batch) for i in range(len(tunnelPoints))]
