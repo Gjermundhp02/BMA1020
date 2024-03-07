@@ -20,6 +20,6 @@ def mark():
         answer = np.array([[i if lenM[i][j][k] != 0 and answer[j][k] == 0 else answer[j][k] for k in range(20)] for j in range(20)])
     answer[answer == 0] = 1
 
-execs = 1000
-print(timeit.timeit(his, number=execs)/timeit.timeit(my, number=execs))
+execs = 100
+print(timeit.timeit(mark, number=execs)/timeit.timeit(my, number=execs))
 
