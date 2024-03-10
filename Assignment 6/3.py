@@ -12,6 +12,7 @@ def my():
     answer = np.zeros_like(M)
     for i in range(0,19):
         answer[answer == 0] = np.where(lenM[i][answer == 0] != 0, i, 0)
+    answer[answer == 0] = 20
 
 def mark():
     lenM = [np.linalg.matrix_power(M, i) for i in range(20)]
@@ -20,6 +21,14 @@ def mark():
         answer = np.array([[i if lenM[i][j][k] != 0 and answer[j][k] == 0 else answer[j][k] for k in range(20)] for j in range(20)])
     answer[answer == 0] = 1
 
+def mark2():
+    lenM = [np.linalg.matrix_power(M, i) for i in range(20)]
+    answer = np.zeros((20,20))
+    for i in range(19, 0, -1):
+        answer[lenM[i] > 0] = i
+
 execs = 100
-print(timeit.timeit(mark, number=execs)/timeit.timeit(my, number=execs))
+print(timeit.timeit(mark, number=execs))
+print(timeit.timeit(mark2, number=execs))
+print(timeit.timeit(my, number=execs))
 
