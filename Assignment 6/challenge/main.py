@@ -11,9 +11,10 @@ backgroundColor = (0.7, 0.7, 0.7, 1)
 colorInTunnel = (0, 0, 0, 1)
 colorOutTunnel = backgroundColor
 createTrack = False
-trackPoints = [(914, 495), (840, 391), (622, 460), (519, 425), (400, 450), (289, 466), (95, 245), (214, 71), (382, 213), (476, 327), (710, 336), (883, 321), (876, 167), (828, 106), (646, 143), (379, 94), (175, 111)]
-tunnelPoints = [(0.01, 0.1), (0.3, 0.4), (0.6, 0.7), (0.9, 0.99)]
+trackPoints = np.array([(914, 495), (840, 391), (622, 460), (519, 425), (400, 450), (289, 466), (95, 245), (214, 71), (382, 213), (476, 327), (710, 336), (883, 321), (876, 167), (828, 106), (646, 143), (379, 94), (175, 111)])
+tunnelPoints = np.array([(0.01, 0.1), (0.3, 0.4), (0.6, 0.7), (0.9, 0.99)])
 t=0
+speed=0.05
 # ----------------
 
 pyglet.gl.glClearColor(*backgroundColor)
@@ -30,6 +31,7 @@ class Cart:
     
     def setPos(self, pos):
         self.pos = np.array([*pos, 1])
+        self.shape._anchor_x, self.shape._anchor_y = self.shape[:2]/2+self.pos[:2]
 
     def update(self):
         self.shape.x, self.shape.y = self.pos[:2]-self.size/2
@@ -78,20 +80,47 @@ class Tunnel:
         self.tpos = np.array(t)
         self.dir = 1
         self.tmid = (t[1]-t[0])/2+t[0]
-        self.pos1 = np.array(translateList(trackPoints, t[0])[0])
-        self.pos2 = np.array(translateList(trackPoints, t[1])[0])
+        self.tprev = 0
         self.width = width
-        self.shape = shapes.Line(*self.pos1, *self.pos2, width, color=(255, 0, 0), batch=batch)
+        self.shape = BezierCurve(trackPoints, self.width, t[0], t[1], 100, color=(255, 0, 0), batch=batch)
         self.t = 0
 
     def update(self, dt):
-        global t, backgroundColor
+        global t, backgroundColor, speed
         # store previous t to check if t has crossed tmid
-        self.t += (self.tpos[1]-self.tpos[0])*(1/self.tpos[1])/2*dt
-        if self.tpos[0]<t<self.tmid:
-            backgroundColor = translate(colorOutTunnel, colorInTunnel, self.t)
-        elif self.tpos[1]>t>self.tmid:
-            backgroundColor = translate(colorInTunnel, colorOutTunnel, self.t)
+        if t>self.tpos[0] and t<self.tpos[1]:
+            if self.t>1:
+                self.dir = -1
+            self.t += 1/(self.tpos[1]-self.tpos[0])*speed*2*self.dir*dt
+            backgroundColor = translate(colorOutTunnel, colorInTunnel, self.t**2*(3-2*self.t))
+            self.tprev = t
+        if t>self.tpos[1]:
+            self.t=0
+            self.dir = 1
+        
+
+class BezierCurve:
+    def __init__(self, points, width, tFrom=0, tTo=1, segments=300, color=(255, 255, 255), batch=None) -> None:
+        self.tpoints = [translateList(points, i)[0] for i in np.arange(tFrom, tTo, (tTo-tFrom)/segments)]
+        self.lines = [shapes.Line(*self.tpoints[i], *self.tpoints[i+1], width, color, batch) for i in range(len(self.tpoints)-1)]
+
+class Track:
+    def __init__(self, points, width, color, batch=None):
+        self.points = points
+        self.width = width
+        self.color = color
+        self.line = BezierCurve(points, width, color=color, batch=batch)
+        self.cart = Cart(points[0], (50, 5), batch=batch)
+
+    def update(self, dt):
+        global t, speed
+        p1 = translateList(trackPoints, t)[0]
+        p2 = translateList(trackPoints, t+dt*speed)[0] # Assumes that dt is the same next frame
+        # self.cart.setPos(p1)
+        # print(np.arccos((p2[0]-p1[0])/np.linalg.norm((p2[0]-p1[0], p2[1]-p1[1]))))
+        self.cart.shape.rotation = np.degrees(np.arccos((p2[0]-p1[0])/np.linalg.norm((p2[0]-p1[0], p2[1]-p1[1]))))
+        self.cart.update()
+        # print(self.cart.shape.x, self.cart.shape.y)
         
 
 def rotate(pos, origin, t):
@@ -120,10 +149,9 @@ def translateList(points, t):
             return translateList([translate(points[i], points[i+1], t) for i in range(len(points)-1)], t=t)
 
 # --- Globals instances ---
-track = shapes.BezierCurve(*trackPoints, thickness=50, color=(255, 0, 0), batch=batch)
-cart = Cart(trackPoints[0], (10, 5), batch=batch)
+track = Track(trackPoints, 10, (25, 25, 25), batch)
 wheel = FerrisWheel((100, 100), 50, batch=batch)
-tunnels = [Tunnel(tunnelPoints[i], 10, batch) for i in range(len(tunnelPoints))]
+tunnels = [Tunnel(tunnelPoints[i], 15, batch) for i in range(len(tunnelPoints))]
 # --------------------------
 
 # --- Curve creation ---
@@ -153,12 +181,10 @@ def on_key_press(symbol, modifiers):
 
 def update(dt):
     global t
-    t += 0.05*dt
+    t += speed*dt
     t%=1
     plist = trackPoints.copy()
-    plist = translateList(plist, t)
-    cart.setPos(plist[0])
-    cart.update()
+    track.update(dt)
     wheel.update()
     for tunnel in tunnels:
         tunnel.update(dt)
