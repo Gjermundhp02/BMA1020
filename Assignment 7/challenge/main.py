@@ -31,7 +31,9 @@ class Cart:
     
     def setPos(self, pos):
         self.pos = np.array([*pos, 1])
-        self.shape._anchor_x, self.shape._anchor_y = self.shape[:2]/2+self.pos[:2]
+        rotOffset = np.array([-np.cos(np.radians(self.shape.rotation))*self.size[0]/2, np.sin(np.radians(self.shape.rotation))*self.size[0]/2])
+        self.shape.x, self.shape.y = self.pos[:2]+rotOffset
+        self.shape.anchor_y = self.size[1]/2
 
     def update(self):
         self.shape.x, self.shape.y = self.pos[:2]-self.size/2
@@ -110,17 +112,14 @@ class Track:
         self.width = width
         self.color = color
         self.line = BezierCurve(points, width, color=color, batch=batch)
-        self.cart = Cart(points[0], (50, 5), batch=batch)
+        self.cart = Cart(points[0], (20, 5), batch=batch)
 
     def update(self, dt):
         global t, speed
         p1 = translateList(trackPoints, t)[0]
         p2 = translateList(trackPoints, t+dt*speed)[0] # Assumes that dt is the same next frame
-        # self.cart.setPos(p1)
-        # print(np.arccos((p2[0]-p1[0])/np.linalg.norm((p2[0]-p1[0], p2[1]-p1[1]))))
+        self.cart.setPos(p1)
         self.cart.shape.rotation = np.degrees(np.arccos((p2[0]-p1[0])/np.linalg.norm((p2[0]-p1[0], p2[1]-p1[1]))))
-        self.cart.update()
-        # print(self.cart.shape.x, self.cart.shape.y)
         
 
 def rotate(pos, origin, t):
