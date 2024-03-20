@@ -8,7 +8,7 @@ WHEIGHT = 540
 window = pyglet.window.Window(WWIDTH, WHEIGHT)
 batch = pyglet.graphics.Batch()
 
-K = 1000
+K = 10000
 
 antall = 100
 r = (np.random.random((antall)))*8+1
@@ -19,13 +19,13 @@ shape = np.array([shapes.Circle(pos[i, 0], pos[i, 1], r[i], batch=batch) for i i
 def update(dt):
     global r, pos, vel, shape
     for i in range(len(pos)-1):
-        vec = pos[i]-pos[i+1:]
+        arr = np.roll(pos, i, axis=0) # Roll over the array to calculate how every ball affects each other
+        vec = arr-pos
         dist = np.tile(np.linalg.norm(vec, axis=1), (2, 1)).T
-        disp = vec/dist # use where to avoid division by zero
-        rn = np.tile(r[i+1:], (2, 1)).T
+        disp = np.where(dist>0, vec/dist, 0)
+        rn = np.tile(r, (2, 1)).T
         f = 1/(dist**2)*r[i]*rn*K*disp
-        vel[i] = np.clip(vel[i]-sum(np.where(dist>r[i]+r[i+1], f/r[i]*dt, 0)), -300, 300)
-        vel[i+1:] = np.clip(vel[i+1:]+np.where(dist>r[i]+r[i+1], f/rn*dt, 0),  -300, 300)
+        vel = np.clip(vel+np.where(dist>r[i]+rn, f/rn*dt, 0),  -300, 300)
         
         # print(vel)
         pos[i] += vel[i]*dt
