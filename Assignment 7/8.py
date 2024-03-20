@@ -8,37 +8,30 @@ WHEIGHT = 540
 window = pyglet.window.Window(WWIDTH, WHEIGHT)
 batch = pyglet.graphics.Batch()
 
-K = 2
+K = 1000
 
-class Circle:
-    def __init__(self) -> None:
-        self.r = np.random.randint(1, 9)
-        self.pos = np.array([np.random.randint(0, WWIDTH), np.random.randint(0, WHEIGHT)])
-        self.vel = np.array([0, 0])
-        self.shape = shapes.Circle(self.pos[0], self.pos[1], self.r)
-    
-    def collides(self, other: Circle):
-        return np.linalg.norm(self.pos-other.pos) < self.r+other.r
-    
-    def gravity(self, other: Circle, dt: float):
-        if not self.collides(other):
-            force = 1/(np.linalg.norm(self.pos-other.pos)**2)*self.r*other.r*(self.pos-other.pos)
-            self.vel = np.clip((force/self.r)*dt+self.vel, -300, 300)
-
-    def update(self, dt: float):
-        self.pos += self.vel*dt
-        self.shape.x, self.shape.y = self.pos
-
-def gravity(circles: np.ndarray[tuple], dt: float):
-    pass
+antall = 100
+r = (np.random.random((antall)))*8+1
+pos = np.random.random((antall, 2))*np.array([WWIDTH, WHEIGHT])
+vel = np.zeros((antall, 2))
+shape = np.array([shapes.Circle(pos[i, 0], pos[i, 1], r[i], batch=batch) for i in range(antall)])
 
 def update(dt):
-    circles[:, 2] = (1/(np.linalg.norm(circles[:-1, 1]-circles[1:, 1])**2)*circles[:-1, 0]*circles[1:, 0]*K*(circles[:-1, 1]-circles[:1, 1]))/circles[:-1, 0]*dt+circles[:-1, 2]
-    circles[:, 1] += circles[:, 2]*dt
-    circles[:, 3].x, circles[:, 3].y = circles[:, 1]
-
-# (r, pos, vel, shape)
-circles = np.array([((r:=np.random.randint(1, 9)), (pos:=np.array([np.random.randint(0, WWIDTH), np.random.randint(0, WHEIGHT)])), shapes.Circle(pos[0], pos[1], r)) for _ in range(10)], dtype=tuple)
+    global r, pos, vel, shape
+    for i in range(len(pos)-1):
+        vec = pos[i]-pos[i+1:]
+        dist = np.tile(np.linalg.norm(vec, axis=1), (2, 1)).T
+        disp = vec/dist # use where to avoid division by zero
+        rn = np.tile(r[i+1:], (2, 1)).T
+        f = 1/(dist**2)*r[i]*rn*K*disp
+        vel[i] = np.clip(vel[i]-sum(np.where(dist>r[i]+r[i+1], f/r[i]*dt, 0)), -300, 300)
+        vel[i+1:] = np.clip(vel[i+1:]+np.where(dist>r[i]+r[i+1], f/rn*dt, 0),  -300, 300)
+        
+        # print(vel)
+        pos[i] += vel[i]*dt
+        shape[i].position = pos[i]
+    pos[-1] += vel[-1]*dt
+    shape[-1].position = pos[-1]
 
 pyglet.clock.schedule_interval(update, 1/60)
 
