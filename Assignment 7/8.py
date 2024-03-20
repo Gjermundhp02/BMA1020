@@ -22,9 +22,9 @@ def update(dt):
         arr = np.roll(pos, i, axis=0) # Roll over the array to calculate how every ball affects each other
         vec = arr-pos
         dist = np.tile(np.linalg.norm(vec, axis=1), (2, 1)).T
-        disp = np.where(dist>0, vec/dist, 0)
+        disp = np.where(dist>0, vec/dist, 1)
         rn = np.tile(r, (2, 1)).T
-        f = 1/(dist**2)*r[i]*rn*K*disp
+        f = 1/(np.where(dist>0, dist**2, 1))*r[i]*rn*K*disp
         vel = np.clip(vel+np.where(dist>r[i]+rn, f/rn*dt, 0),  -300, 300)
         
         # print(vel)
