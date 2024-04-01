@@ -1,0 +1,2 @@
+https://numpy.org/doc/stable/reference/generated/numpy.insert.html
+https://numpy.org/doc/stable/reference/generated/numpy.hstack.html
