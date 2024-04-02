@@ -27,7 +27,7 @@
 from __future__ import annotations
 import numpy as np
 import pyglet
-import pyglet.shapes as shapes
+import pyglet.shapes
 
 WWIDTH = 960
 WHEIGHT = 540
@@ -60,6 +60,7 @@ class Circle:
 
     def update(self, other: Circle, dt: float):
         self.outOfBounds()
+        other.outOfBounds()
 
         if not sum(self.pos-other.pos):
             return
@@ -70,25 +71,39 @@ class Circle:
             normal = (self.pos-other.pos)/dist
             self.pos += normal*(self.r+other.r-dist)/2
             other.pos -= normal*(self.r+other.r-dist)/2
-            # self.vel = tangent*np.clip(np.dot(self.vel, tangent), -MAXSPEED, MAXSPEED)
-            # other.vel = tangent*np.clip(np.dot(other.vel, tangent), -MAXSPEED, MAXSPEED)
-            # include r in the calculation
-            print(sum(self.vel*self.r+other.vel*other.r))
-            self.vel = (self.r-other.r)/(self.r+other.r)*self.vel+2*other.r/(self.r+other.r)*other.vel
-            other.vel = 2*self.r/(self.r+other.r)*self.vel-(self.r-other.r)/(self.r+other.r)*other.vel
-            print(sum(self.vel*self.r+other.vel*other.r))
+            p = 2*(self.vel-other.vel)/(self.r+other.r)
+            self.vel = self.vel-p*other.r
+            other.vel = other.vel+p*self.r
         
         self.pos += self.vel*dt
         self.shape.x, self.shape.y = self.pos
         other.pos += other.vel*dt
         other.shape.x, other.shape.y = other.pos
 
-circles = np.array([Circle() for _ in range(5)], dtype=tuple)
+
+circles = np.array([[np.array([np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)]), 
+                     np.array([np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)]), 
+                     [np.random.randint(10, 22), 0]] for _ in range(10)])
+shapes = np.array([pyglet.shapes.Circle(i[0][0], i[0][1], i[2][0], color=(255, 255, 255), batch=batch) for i in circles])
+
+# circles = np.array([Circle() for _ in range(100)], dtype=tuple)
 
 def update(dt):
+    circles[circles[:, 0, 0] < 0, 0, 0] = circles[circles[:, 0, 0] < 0, 0, 0]+WWIDTH
+    circles[circles[:, 0, 0] > WWIDTH, 0, 0] = circles[circles[:, 0, 0] > WWIDTH, 0, 0]-WWIDTH
+    circles[circles[:, 0, 1] < 0, 0, 1] = circles[circles[:, 0, 1] < 0, 0, 1]+WHEIGHT
+    circles[circles[:, 0, 1] > WHEIGHT, 0, 1] = circles[circles[:, 0, 1] > WHEIGHT, 0, 1]-WHEIGHT
+    test = np.empty((len(circles), len(circles)), dtype=bool)
     for i in range(len(circles)):
-        for j in range(len(circles)):
-            circles[i].update(circles[j], dt)
+        roll = np.roll(circles, -i, axis=0)
+        test[i] = np.linalg.norm(circles[:, 0]-roll[:, 0], axis=1)<(circles[:, 2, 0]+roll[:, 2, 0])
+    for i in range(1, len(circles)):
+        test[:, i] = np.roll(test[:, i], i)
+    arr = [[[0], [1]]]
+    print(test[arr])
+    circles[:, 0] += circles[:, 1]*dt
+    for i in range(len(shapes)):
+        shapes[i].x, shapes[i].y = circles[i, 0]
 
 pyglet.clock.schedule_interval(update, 1/60)
 

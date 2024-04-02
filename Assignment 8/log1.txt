@@ -1,1 +1,3 @@
 https://en.wikipedia.org/wiki/Elastic_collision
+https://ericleong.me/research/circle-circle/
+https://numpy.org/doc/stable/reference/generated/numpy.triu.html
