@@ -36,7 +36,7 @@ window = pyglet.window.Window(WWIDTH, WHEIGHT)
 batch = pyglet.graphics.Batch()
 
 K = 2
-MAXSPEED = 20
+MAXSPEED = 40
 
 class Circle:
     def __init__(self) -> None:
@@ -81,27 +81,38 @@ class Circle:
         other.shape.x, other.shape.y = other.pos
 
 
-circles = np.array([[np.array([np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)]), 
-                     np.array([np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)]), 
-                     [np.random.randint(10, 22), 0]] for _ in range(10)])
-shapes = np.array([pyglet.shapes.Circle(i[0][0], i[0][1], i[2][0], color=(255, 255, 255), batch=batch) for i in circles])
+circles = np.array([[[np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)], 
+                     [np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)], 
+                     [np.random.randint(10, 22), 0]] for _ in range(2)])
+circles = np.array([[[50+_*50, 50], 
+                     [20*(-1)**_, 0], 
+                     [np.random.randint(10, 22), 0]] for _ in range(2)], dtype=float)
+shapes = np.array([pyglet.shapes.Circle(i[0, 0], i[0, 1], i[2, 0], color=(255, 255, 255), batch=batch) for i in circles])
 
 # circles = np.array([Circle() for _ in range(100)], dtype=tuple)
 
 def update(dt):
+    # Fix them appearing inside the screen
     circles[circles[:, 0, 0] < 0, 0, 0] = circles[circles[:, 0, 0] < 0, 0, 0]+WWIDTH
     circles[circles[:, 0, 0] > WWIDTH, 0, 0] = circles[circles[:, 0, 0] > WWIDTH, 0, 0]-WWIDTH
     circles[circles[:, 0, 1] < 0, 0, 1] = circles[circles[:, 0, 1] < 0, 0, 1]+WHEIGHT
     circles[circles[:, 0, 1] > WHEIGHT, 0, 1] = circles[circles[:, 0, 1] > WHEIGHT, 0, 1]-WHEIGHT
-    test = np.empty((len(circles), len(circles)), dtype=bool)
-    for i in range(len(circles)):
-        roll = np.roll(circles, -i, axis=0)
-        test[i] = np.linalg.norm(circles[:, 0]-roll[:, 0], axis=1)<(circles[:, 2, 0]+roll[:, 2, 0])
     for i in range(1, len(circles)):
-        test[:, i] = np.roll(test[:, i], i)
-    arr = [[[0], [1]]]
-    print(test[arr])
+        roll = np.roll(circles, -i, axis=0)
+        tes = np.linalg.norm(circles[:, 0]-roll[:, 0], axis=1)<(circles[:, 2, 0]+roll[:, 2, 0])
+        r2 = (circles[tes, 2, 0]+roll[tes, 2, 0])[:, np.newaxis]
+        dist = np.linalg.norm(circles[tes, 0]-roll[tes, 0], axis=1)[:, np.newaxis]
+        norm = (circles[tes, 0]-roll[tes, 0])/dist
+        circles[tes, 0] += (r2-dist)*norm/2
+        circles[np.roll(tes, i), 0] -= (r2-dist)*norm/2
+        if tes.any(): print((r2-dist)*norm/2)
+        # circles[tes, 1] += 2*np.sum((circles[tes, 1]-roll[tes, 1])*norm, axis=1)[:, np.newaxis]
+        # roll[tes, 1] -= 2*np.sum((circles[tes, 1]-roll[tes, 1])*norm, axis=1)[:, np.newaxis]
+        # circles[tes, 1] += roll[tes, 1]
+        # circles[np.roll(tes, i, axis=0), 0] = np.roll(roll[tes, 0], i, axis=0)
+        # the velovity of the circles colliding with i circles[tes, 0, 0]
     circles[:, 0] += circles[:, 1]*dt
+    # Vectorize this
     for i in range(len(shapes)):
         shapes[i].x, shapes[i].y = circles[i, 0]
 

@@ -1,29 +1,3 @@
-# Here are some information about what is happening:
-
-
-# Each particles is a circle.
-
-# 5 particles are spawning each frame
-
-# Particles spawn with a random speed between 200 and 300 pixels per second.
-
-# Particles spawn with a random angle between pi/4 and 3pi/4
-
-# Particles spawn with a random radius between 10 and 15.
-
-# All particles spawn in the middle of the window
-
-# Acceleration due to "gravity" is 200
-
-# There is a horizontal force due to wind, acceleration due to wind is given by the formula  windvelocityx * 2* diskradius - diskvelocityx
-
-# The direction of the wind interpolates between blowing from the left and blowing from the right
-
-# Particles are destroyed when they leave at the bottom of the screen
-
-
-# Implement the particle system. For full score you should make effective use of numpy for calculations.
-
 from __future__ import annotations
 import numpy as np
 import pyglet
