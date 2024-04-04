@@ -83,10 +83,10 @@ class Circle:
 
 circles = np.array([[[np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)], 
                      [np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)], 
-                     [np.random.randint(10, 22), 0]] for _ in range(2)])
-circles = np.array([[[50+_*50, 50], 
+                     [np.random.randint(10, 22), 0]] for _ in range(10)]) # replace zero with newaxies
+circles = np.array([[[50+_*100, 50+_*20], 
                      [20*(-1)**_, 0], 
-                     [np.random.randint(10, 22), 0]] for _ in range(2)], dtype=float)
+                     [15, 0]] for _ in range(3)], dtype=float)
 shapes = np.array([pyglet.shapes.Circle(i[0, 0], i[0, 1], i[2, 0], color=(255, 255, 255), batch=batch) for i in circles])
 
 # circles = np.array([Circle() for _ in range(100)], dtype=tuple)
@@ -101,18 +101,24 @@ def update(dt):
         roll = np.roll(circles, -i, axis=0)
         tes = np.linalg.norm(circles[:, 0]-roll[:, 0], axis=1)<(circles[:, 2, 0]+roll[:, 2, 0])
         r2 = (circles[tes, 2, 0]+roll[tes, 2, 0])[:, np.newaxis]
+        rm2 = (circles[tes, 2, 0]-roll[tes, 2, 0])[:, np.newaxis]
         dist = np.linalg.norm(circles[tes, 0]-roll[tes, 0], axis=1)[:, np.newaxis]
         norm = (circles[tes, 0]-roll[tes, 0])/dist
+        # Move out of collision
+        if tes.any(): print((r2-dist)*norm/2+np.roll((r2-dist)*norm/2, i))
         circles[tes, 0] += (r2-dist)*norm/2
-        circles[np.roll(tes, i), 0] -= (r2-dist)*norm/2
-        if tes.any(): print((r2-dist)*norm/2)
-        # circles[tes, 1] += 2*np.sum((circles[tes, 1]-roll[tes, 1])*norm, axis=1)[:, np.newaxis]
-        # roll[tes, 1] -= 2*np.sum((circles[tes, 1]-roll[tes, 1])*norm, axis=1)[:, np.newaxis]
-        # circles[tes, 1] += roll[tes, 1]
-        # circles[np.roll(tes, i, axis=0), 0] = np.roll(roll[tes, 0], i, axis=0)
-        # the velovity of the circles colliding with i circles[tes, 0, 0]
+        if tes.any(): print(np.linalg.norm(circles[tes, 0]-roll[tes, 0], axis=1)[:, np.newaxis], r2)
+        circles[np.roll(tes, i), 0] -= np.roll((r2-dist)*norm/2, i)
+        if tes.any(): print(np.linalg.norm(circles[tes, 0]-np.roll(circles, -i, axis=0)[tes, 0], axis=1)[:, np.newaxis], r2)
+        # Collisions
+        circles[tes, 1] = rm2/r2*circles[tes, 1]+2*roll[tes, 2, 0][:, np.newaxis]/r2*roll[tes, 1]
+        if tes.any(): print(circles[:, 1])
+        circles[np.roll(tes, i), 1] = np.roll(2*circles[tes, 2, 0][:, np.newaxis]/r2*circles[tes, 1]-rm2/r2*roll[tes, 1], i)
+        if tes.any(): print(circles[:, 1])
+        if tes.any(): print(np.linalg.norm(circles[tes, 0]-roll[tes, 0], axis=1)[:, np.newaxis], r2)
+
+    # Update positions
     circles[:, 0] += circles[:, 1]*dt
-    # Vectorize this
     for i in range(len(shapes)):
         shapes[i].x, shapes[i].y = circles[i, 0]
 
