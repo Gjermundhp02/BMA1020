@@ -1,29 +1,3 @@
-# The pseudo code for collision detection and response is:
-
-# - check all possible pairs of circles for collision.
-
-# - where a collision happens, compute the normal and tangent direction of collision, and perform 1d collision in the normal direction
-
-# - move objects out of collision before continuing
-
-# The mathematical details for the calculations were given in class.
-
-
-# Some more details you should follow
-
-# - there are 100 circles with random radii between 2 and 22.
-
-# - at the start circles have random positions in the window
-
-# - at the start circles have random velocity (-MAXSPEED...MAXSPEED for x and y).
-
-# - the mass of a disk is equal to its radius
-
-
-# Implement the program. For full score you should make effective use of numpy.
-
-# Include a log where you detail all the help you have gotten from people/websites and ai. Include complete conversations with ai. Comment in code where you have used outside sources.
-
 from __future__ import annotations
 import numpy as np
 import pyglet
@@ -84,12 +58,8 @@ class Circle:
 circles = np.array([[[np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)], 
                      [np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)], 
                      [np.random.randint(10, 22), 0]] for _ in range(100)]) # replace zero with newaxies
-# circles = np.array([[[50+_*100, 100-_*20], 
-#                      [20*(-1)**_, 0], 
-#                      [15, 0]] for _ in range(100)], dtype=float)
-shapes = np.array([pyglet.shapes.Circle(i[0, 0], i[0, 1], i[2, 0], color=(255, 255, 255), batch=batch) for i in circles])
 
-# circles = np.array([Circle() for _ in range(100)], dtype=tuple)
+shapes = np.array([pyglet.shapes.Circle(i[0, 0], i[0, 1], i[2, 0], color=(255, 255, 255), batch=batch) for i in circles])
 
 def update(dt):
     # Fix them appearing inside the screen
@@ -106,7 +76,6 @@ def update(dt):
         vec = (circles[collides, 0]-roll[collides, 0])/dist
         norm = np.vstack((vec[:, 0]*-1, vec[:, 1])).T
         # Move out of collision
-        # if collides.any(): print(i, collides)
         circles[collides, 0] += (r2-dist)*vec/2
         circles[np.roll(collides, i), 0] -= (r2-dist)*vec/2
         # Collisions
@@ -116,8 +85,6 @@ def update(dt):
         c2 = (2*circles[collides, 2, 0]/r2[:, 0]*cVel-(rm2/r2)[:, 0]*rVel)[:, np.newaxis]
         circles[collides, 1] = c1*norm
         circles[np.roll(collides, i), 1] = c2*-norm
-        # if tes.any(): print(circles[:, 1])
-        # if tes.any(): print(np.linalg.norm(circles[tes, 0]-roll[tes, 0], axis=1)[:, np.newaxis], r2)
 
     # Update positions
     circles[:, 0] += circles[:, 1]*dt
