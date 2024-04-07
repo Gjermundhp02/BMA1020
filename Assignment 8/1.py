@@ -12,49 +12,6 @@ batch = pyglet.graphics.Batch()
 K = 2
 MAXSPEED = 40
 
-class Circle:
-    def __init__(self) -> None:
-        self.r = np.random.randint(10, 22)
-        self.pos = np.array([np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)])
-        self.vel = np.array([np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)])
-        self.shape = shapes.Circle(self.pos[0], self.pos[1], self.r, color=(255, 255, 255), batch=batch)
-    
-    def collides(self, other: Circle):
-        return np.linalg.norm(self.pos-other.pos) < self.r+other.r
-    
-    def outOfBounds(self):
-        if self.pos[0] < 0:
-          self.pos[0] = WWIDTH  
-        if self.pos[0] > WWIDTH:
-            self.pos[0] = 0
-        if self.pos[1] < 0:
-            self.pos[1] = WHEIGHT
-        if self.pos[1] > WHEIGHT:
-            self.pos[1] = 0
-
-    def update(self, other: Circle, dt: float):
-        self.outOfBounds()
-        other.outOfBounds()
-
-        if not sum(self.pos-other.pos):
-            return
-        dist = np.linalg.norm(self.pos-other.pos)
-        
-
-        if dist < self.r+other.r:
-            normal = (self.pos-other.pos)/dist
-            self.pos += normal*(self.r+other.r-dist)/2
-            other.pos -= normal*(self.r+other.r-dist)/2
-            p = 2*(self.vel-other.vel)/(self.r+other.r)
-            self.vel = self.vel-p*other.r
-            other.vel = other.vel+p*self.r
-        
-        self.pos += self.vel*dt
-        self.shape.x, self.shape.y = self.pos
-        other.pos += other.vel*dt
-        other.shape.x, other.shape.y = other.pos
-
-
 circles = np.array([[[np.random.uniform(0, WWIDTH), np.random.uniform(0, WHEIGHT)], 
                      [np.random.uniform(-MAXSPEED, MAXSPEED), np.random.uniform(-MAXSPEED, MAXSPEED)], 
                      [np.random.randint(10, 22), 0]] for _ in range(100)]) # replace zero with newaxies
