@@ -1,4 +1,5 @@
 # Softbody collision between two squares
+from __future__ import annotations
 import numpy as np
 import pyglet
 import pyglet.shapes as shapes
@@ -9,8 +10,10 @@ WHEIGHT = 540
 window = pyglet.window.Window(WWIDTH, WHEIGHT)
 batch = pyglet.graphics.Batch()
 
-SPEED = 0.01
-K = 9
+DEBUG = False
+SPEED = 1
+Ks = 2
+Kd = 40
 g = 10
 
 def genVec(n):
@@ -24,7 +27,9 @@ def listDot(a, b):
     return np.sum(a*b, axis=1)
 
 def listSub(a):
-    return a[:, 0]-a[:, 1]
+    b = [a[i, 0]-a[i, 1] for i in range(len(a))]
+    b = a[:, 0]-a[:, 1]
+    return b
 class SoftBody:
     def __init__(self, pos, vel, size):
         self.size = size
@@ -34,32 +39,38 @@ class SoftBody:
         }
         self.lines = {
             "lines": (l:=np.hstack((v:=genVec(4), np.linalg.norm(p[v[:, 0], 0]-p[v[:, 1], 0], axis=1)[:, np.newaxis]))),
-            "shapes": np.array([shapes.Line(*p[int(i), 0], *p[int(j), 0], color=(255, 255, 255), batch=batch) for i, j, _ in l])
+            "shapes": np.array([shapes.Line(*p[int(i), 0], *p[int(j), 0], 3, color=(255, 255, 255), batch=batch) for i, j, _ in l])
         }
 
     def update(self, dt):
-        self.points["points"][self.points["points"][:, 0, 1] < 5, 2, 1] += g*SPEED*dt # Prevent buildup of speed while on the ground
-        self.points["points"][self.points["points"][:, 0, 1] < 5, 0, 1] = 5 # Keep in bounds y
+        oBounds = self.points["points"][:, 0, 1] < 5
+        if len(oBounds):
+            np.add.at(self.points["points"][:, 2, 1], oBounds, g*SPEED*dt) # Prevent buildup of speed while on the ground
+            # self.points["points"][oBounds, 2, 1] += g*SPEED*dt # Prevent buildup of speed while on the ground
+            self.points["points"][oBounds, 0, 1] = 5 # Keep in bounds y
+            self.points["points"][oBounds, 1] = 0 # Keep in bounds y
         vecs = self.points["points"][self.lines["lines"][:, 0].astype(np.int64), 0]-self.points["points"][self.lines["lines"][:, 1].astype(np.int64), 0] # Vectors between all the points
         dist = np.linalg.norm(vecs, axis=1) # Distance between all the points
-        distDiff = (self.lines["lines"][:, 2]-dist)[:, np.newaxis] # Distance differance between what it should be and what it is
-        for i in range(len(distDiff)):
-            if distDiff[i]>0.001:
-                self.lines["shapes"][i].color = (255, 0, 0)
-            elif distDiff[i]<-0.001:
-                self.lines["shapes"][i].color = (0, 255, 0)
-            else:
-                self.lines["shapes"][i].color = (255, 255, 255)
-        if (distDiff>0.001).any() or (distDiff<-0.001).any(): # Needed because of floating point errors
-            norm = vecs/dist[:, np.newaxis] # Normalized vectors between all the points
-            Fs = distDiff*K # Spring force
-            Fd = listDot(norm, listSub(self.points["points"][self.lines["lines"][:, 0:2].astype(np.int64), 1]))*8 # Damping force
-            acc = (Fs+Fd.reshape(-1, 1))*norm/2 # Acceleration
-            # acc = ((distDiff*K)+(listDot(norm, listSub(self.points["points"][self.lines["lines"][:, 0:2].astype(np.int64), 1]))*8).reshape(-1, 1))*norm/2
-            self.points["points"][self.lines["lines"][:, 0].astype(np.int64), 2] += acc # Add acceleration to the first point
-            self.points["points"][self.lines["lines"][:, 1].astype(np.int64), 2] -= acc # Subtract acceleration from the second point
-
-        self.points["points"][:, 1] = self.points["points"][:, 1]+self.points["points"][:, 2]*SPEED*dt+np.array([0, -g])*SPEED*dt # Update velocity
+        distDiff = (dist-self.lines["lines"][:, 2])[:, np.newaxis] # Distance differance between what it should be and what it is
+        if DEBUG:
+            for i in range(len(distDiff)):
+                if distDiff[i]>0.001:
+                    self.lines["shapes"][i].color = (0, 255, 0) # Expands
+                elif distDiff[i]<-0.001:
+                    self.lines["shapes"][i].color = (255, 0, 0) # Contracts
+                else:
+                    self.lines["shapes"][i].color = (255, 255, 255)
+        norm = vecs/dist[:, np.newaxis] # Normalized vectors between all the points
+        Fs = distDiff*Ks # Spring force
+        Fd = listDot(norm, listSub(self.points["points"][self.lines["lines"][:, 0:2].astype(np.int64), 1]))*Kd # Damping force
+        acc = (Fs+Fd.reshape(-1, 1))*norm/2 # Acceleration
+        # acc = ((distDiff*K)+(listDot(norm, listSub(self.points["points"][self.lines["lines"][:, 0:2].astype(np.int64), 1]))*8).reshape(-1, 1))*norm/2
+        np.add.at(self.points["points"][:, 2], self.lines["lines"][:, 1].astype(np.int64), acc) # Add acceleration to the first point
+        np.subtract.at(self.points["points"][:, 2], self.lines["lines"][:, 0].astype(np.int64), acc) # Subtract acceleration from the second point
+        # self.points["points"][self.lines["lines"][:, 0].astype(np.int64), 2] = self.points["points"][self.lines["lines"][:, 0].astype(np.int64), 2]+ acc # Add acceleration to the first point
+        # self.points["points"][self.lines["lines"][:, 1].astype(np.int64), 2] = self.points["points"][self.lines["lines"][:, 1].astype(np.int64), 2]- acc # Subtract acceleration from the second point
+        self.points["points"][:, 2] = self.points["points"][:, 2]+np.array([0, -g])*SPEED*dt # Add gravity
+        self.points["points"][:, 1] = self.points["points"][:, 1]+self.points["points"][:, 2]*SPEED*dt # Update velocity
         self.points["points"][:, 0] = self.points["points"][:, 0]+self.points["points"][:, 1]*SPEED*dt # Update position
 
         # Update shapes
@@ -70,8 +81,40 @@ class SoftBody:
             self.lines["shapes"][i].x, self.lines["shapes"][i].y = self.points["points"][int(self.lines["lines"][i, 0]), 0]
             self.lines["shapes"][i].x2, self.lines["shapes"][i].y2 = self.points["points"][int(self.lines["lines"][i, 1]), 0]
 
-s1 = SoftBody(np.array([100, 5]), np.array([0, 0]), 100)
-pyglet.clock.schedule_interval(s1.update, 1/60)
+    def collides(self, other: SoftBody):
+        # Requires the objects to have the same amount of points
+        # Rough check
+        minXY = other.points["points"][:, 0].min(axis=0)
+        maxXY = other.points["points"][:, 0].max(axis=0)
+        cY = (self.points["points"][:, 0, 1] > minXY[1]) & (self.points["points"][:, 0, 1] < maxXY[1]) # True for corner that collides in y
+        cX = (self.points["points"][:, 0, 0] > minXY[0]) & (self.points["points"][:, 0, 0] < maxXY[0]) # True for corner that collides in x
+        c = cX & cY
+
+        # Fine check
+        if c.any():
+            # Self = p+r, other = q+s
+            q = other.points["points"][other.lines["lines"][:, 0].astype(np.int64), 0]
+            p = np.full_like(q, self.points["points"][c, 0])
+            s = other.points["points"][other.lines["lines"][:, 1].astype(np.int64), 0]-q # Vectors between all the points
+            r = np.full_like(s, self.points["points"][c, 1])
+            rXs = np.cross(r, s, axis=1)
+            t = np.cross((q[rXs!=0]-p[rXs!=0]), s[rXs!=0], axis=1)/rXs[rXs!=0]
+            u = np.cross((q[rXs!=0]-p[rXs!=0]), r[rXs!=0], axis=1)/rXs[rXs!=0]
+            if ((t<=1) & (t>=0) & (u<=1) & (u>=0)).any():
+                print(t[(t<=1) & (t>=0) & (u<=1) & (u>=0)])
+                p = self.points["points"][c, 0]+self.points["points"][c, 1]*t[(t<=1) & (t>=0) & (u<=1) & (u>=0)]
+                print(p)
+
+
+s1 = SoftBody(np.array([100, 300]), np.array([0, 0]), 100)
+s2 = SoftBody(np.array([150, 420]), np.array([0, -10]), 100)
+
+def update(dt):
+    s1.update(dt)
+    s2.update(dt)
+    s1.collides(s2)
+
+pyglet.clock.schedule_interval(update, 1/60)
 
 @window.event
 def on_draw():

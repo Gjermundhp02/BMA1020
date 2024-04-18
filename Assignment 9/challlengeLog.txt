@@ -1,1 +1,4 @@
 https://numpy.org/doc/stable/reference/generated/numpy.hstack.html
+https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+https://www.youtube.com/watch?v=kyQP4t_wOGI&t=200s
+https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
