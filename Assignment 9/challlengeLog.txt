@@ -2,3 +2,5 @@ https://numpy.org/doc/stable/reference/generated/numpy.hstack.html
 https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
 https://www.youtube.com/watch?v=kyQP4t_wOGI&t=200s
 https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
+https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
