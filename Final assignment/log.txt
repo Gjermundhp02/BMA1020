@@ -1,0 +1,10 @@
+Nicolai helped me a lot to understand splicing of beziercurves
+https://matthew-brett.github.io/teaching/rotation_2d.html
+https://www.geogebra.org/calculator
+https://stackoverflow.com/questions/39839034/python-tuple-indices-must-be-integers-not-tuple
+https://stackoverflow.com/questions/21483999/using-atan2-to-find-angle-between-two-vectors
+https://math.stackexchange.com/questions/4542705/derivatives-of-a-linear-and-cubic-b%C3%A9zier-curve
+https://numpy.org/doc/stable/reference/generated/numpy.stack.html#numpy.stack
+https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+https://pomax.github.io/bezierinfo/
+https://gamedev.stackexchange.com/questions/27056/how-to-achieve-uniform-speed-of-movement-on-a-bezier-curve
